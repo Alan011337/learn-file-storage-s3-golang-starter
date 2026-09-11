@@ -1,65 +1,69 @@
-# learn-file-storage-s3-golang-starter (Tubely)
+# Tubely — Go File Storage, S3 & CloudFront Learning Project
 
-This repo contains the starter code for the Tubely application - the #1 tool for engagement bait - for the "Learn File Servers and CDNs with S3 and CloudFront" [course](https://www.boot.dev/courses/learn-file-servers-s3-cloudfront-golang) on [boot.dev](https://www.boot.dev)
+A Boot.dev course project for learning **file-serving architecture, object storage, media processing, and CDN delivery** with Go, Amazon S3, and CloudFront.
 
-## Quickstart
+This repository is part of my backend-systems learning path. It is **learning / implementation evidence**, not a claim of production-scale cloud expertise.
 
-*This is to be used as a *reference\* in case you need it, you should follow the instructions in the course rather than trying to do everything here.
+## What this project explores
 
-## 1. Install dependencies
+- serving and managing files from a Go application
+- local media / asset handling
+- object storage with Amazon S3
+- CDN concepts with CloudFront
+- media inspection / processing with FFmpeg and FFprobe
+- application configuration through environment variables
+- SQLite-backed local application state
 
-- [Go](https://golang.org/doc/install)
-- `go mod download` to download all dependencies
-- [FFMPEG](https://ffmpeg.org/download.html) - both `ffmpeg` and `ffprobe` are required to be in your `PATH`.
+## Local setup
+
+### Requirements
+
+- Go
+- FFmpeg / FFprobe
+- SQLite 3 (for manual database inspection)
+- AWS CLI
+
+### Install dependencies
 
 ```bash
-# linux
-sudo apt update
-sudo apt install ffmpeg
-
-# mac
-brew update
-brew install ffmpeg
+go mod download
 ```
 
-- [SQLite 3](https://www.sqlite.org/download.html) only required for you to manually inspect the database.
+On macOS:
 
 ```bash
-# linux
-sudo apt update
-sudo apt install sqlite3
-
-# mac
 brew update
-brew install sqlite3
+brew install ffmpeg sqlite3
 ```
 
-- [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html)
-
-## 2. Download sample images and videos
+### Download sample media
 
 ```bash
 ./samplesdownload.sh
-# samples/ dir will be created
-# with sample images and videos
 ```
 
-## 3. Configure environment variables
-
-Copy the `.env.example` file to `.env` and fill in the values.
+### Configure environment variables
 
 ```bash
 cp .env.example .env
 ```
 
-You'll need to update values in the `.env` file to match your configuration, but _you won't need to do anything here until the course tells you to_.
+Fill in the required values for your local / AWS configuration.
 
-## 3. Run the server
+### Run
 
 ```bash
 go run .
 ```
 
-- You should see a new database file `tubely.db` created in the root directory.
-- You should see a new `assets` directory created in the root directory, this is where the images will be stored.
-- You should see a link in your console to open the local web page.
+The application creates local state such as a SQLite database and an assets directory as part of the course workflow.
+
+## Why it matters to my learning
+
+This project helps me understand the path from a backend application to **durable file storage and content delivery infrastructure**. It complements my work on HTTP APIs, PostgreSQL, Docker, RabbitMQ, and other backend fundamentals by adding object storage, media workflows, and CDN concepts.
+
+## Context
+
+Course: Boot.dev — Learn File Servers and CDNs with S3 and CloudFront
+
+Related technical foundations I am building: **Go · HTTP · file storage · S3 · CloudFront · AWS fundamentals · media processing · backend systems**.
