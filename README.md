@@ -21,7 +21,11 @@ User / application request
         ↓
 Go application
         ↓
-Upload / persist object
+metadata / control state
+        ↘
+       SQLite
+        ↓
+object upload / lookup
         ↓
 Amazon S3
         ↓
@@ -30,17 +34,42 @@ CloudFront / delivery layer
 Client fetches media / asset
 ```
 
-A useful architectural distinction is between **application metadata** and **file bytes**. Product state may live in an application database, while large or durable objects are better handled by object storage. Delivery can then be separated again through a CDN layer.
+A useful architectural distinction is between **application metadata**, **file bytes**, **derived media**, and **delivery state**. The UI may present these as one feature, but the system has to keep them consistent across multiple layers.
 
-That separation creates product and system questions around authorization, object naming, cache behavior, invalidation, upload failure, media processing, cost, and stale content.
+That separation creates product and system questions around authorization, object naming, cache behavior, invalidation, upload failure, media processing, cost, stale content, and cleanup.
 
-## Why object storage and CDN are separate concerns
+## Why object storage, metadata, processing, and CDN are separate concerns
 
-- **Object storage** answers: where should durable file bytes live, and how should the application address them?
-- **CDN / delivery** answers: how should those files be delivered efficiently to users, potentially from caches closer to them?
 - **Application metadata** answers: what does the product know about the asset — owner, status, references, processing state, permissions, etc.?
+- **Object storage** answers: where should durable file bytes live, and how should the application address them?
+- **Media processing** answers: how do source files become thumbnails, previews, transcoded files, or other derived assets?
+- **CDN / delivery** answers: how should those files be delivered efficiently to users, potentially from caches closer to them?
 
-For Product / TPM work, the useful question is not simply “do we use S3?” but **what lifecycle, permission, latency, reliability, and cost behavior does the product require?**
+For Product / TPM work, the useful question is not simply “do we use S3?” but **what lifecycle, permission, latency, reliability, freshness, and cost behavior does the product require?**
+
+## Asset lifecycle model
+
+One product-level way to reason about a media asset is:
+
+```text
+Upload requested
+   ↓
+Metadata record created
+   ↓
+Object stored
+   ↓
+Processing / inspection
+   ↓
+Derived assets ready
+   ↓
+Delivery available
+   ↓
+Update / replace / delete
+   ↓
+Metadata + source + derived objects + caches reconciled
+```
+
+The important lesson is that a successful API response at one step does not guarantee the whole asset lifecycle is healthy. A robust product design needs explicit states and recovery paths for partial failure.
 
 ## Local setup
 
@@ -96,6 +125,7 @@ It is particularly useful for discussing:
 - how upload / processing / delivery can become separate product states;
 - how permissions and signed-access patterns affect product behavior;
 - what happens when metadata succeeds but a file upload fails, or vice versa;
+- how source and derived assets should be linked and cleaned up;
 - how caching can improve delivery while creating staleness / invalidation questions;
 - how media processing adds asynchronous failure and observability requirements;
 - how storage and bandwidth choices affect both cost and user experience.
@@ -107,13 +137,16 @@ A useful discussion of this repository should be able to answer:
 1. Why use object storage instead of storing large files directly in a relational database?
 2. What product state should live in the application database versus S3?
 3. What can go wrong between upload, metadata persistence, processing, and delivery?
-4. When can CDN caching produce stale or unauthorized behavior?
-5. How would private files differ from public assets in a production design?
-6. What monitoring, retry, access-control, and lifecycle policies would be needed before this became production-ready?
+4. How should source and derived assets behave when a user replaces or deletes a file?
+5. When can CDN caching produce stale or unauthorized behavior?
+6. How would private files differ from public assets in a production design?
+7. What monitoring, retry, access-control, and lifecycle policies would be needed before this became production-ready?
 
 ## Evidence boundary
 
-This repository supports claims about foundational **Go file handling, S3 object-storage concepts, CloudFront/CDN concepts, media-processing workflows, and storage/delivery architecture reasoning**. It does **not** establish production cloud-architecture ownership, high-scale CDN operations, advanced AWS security expertise, or production SRE experience.
+This repository supports claims about foundational **Go file handling, S3 object-storage concepts, CloudFront/CDN concepts, media-processing workflows, asset lifecycle reasoning, and storage/delivery architecture reasoning**. It does **not** establish production cloud-architecture ownership, high-scale CDN operations, advanced AWS security expertise, production SRE experience, or cost optimization at scale.
+
+The intended signal is **storage / delivery architecture literacy and implementation exposure**, not cloud-architect expertise.
 
 ## Context
 
